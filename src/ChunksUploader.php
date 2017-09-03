@@ -47,7 +47,6 @@ class ChunksUploader
 
         $uploadChunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . $chunkName;
         $upload          = move_uploaded_file($_FILES[$this->inputName]['tmp_name'], $uploadChunkPath);
-        chmod($uploadChunkPath, 0775);
 
         if (!$upload) {
             return [
@@ -201,7 +200,11 @@ class ChunksUploader
         foreach ($files as $key => $file) {
             $isHidden = strpos($file, '.');
 
-            if ($isHidden === false || $isHidden > 1) {
+            if (
+                ($isHidden === false || $isHidden > 1)
+                &&
+                trim($file) != 'chunks_list.php'
+            ) {
                 $cleanList[] = trim($file);
             }
         }
