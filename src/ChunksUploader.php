@@ -105,7 +105,7 @@ class ChunksUploader
         try {
 
             foreach ($chunks as $chunkName) {
-                $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . $chunkName;
+                $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
                 unlink($chunkPath);
             }
 
