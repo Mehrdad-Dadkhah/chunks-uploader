@@ -1,0 +1,22 @@
+{
+    "name": "mehrdad-dadkhah/chunks-uploader",
+    "description": "upload chunks file. use to upload big files",
+    "keywords": ["uploader","file", "chunks", "big_file", "fine_uploader", "video", "tus_uploader", "flowjs_uploader", "server_uploader"],
+    "homepage": "https://github.com/Mehrdad-Dadkhah/chunks-uploader",
+    "type": "library",
+    "require": {
+	    "php": ">=5.5"
+    },
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Mehrdad Dadkhah",
+            "email": "mehrdad@dadkhah.me"
+        }
+    ],
+    "autoload": {
+	    "psr-4": {
+		    "MehrdadDadkhah\\Video\\": "src/"
+	    }
+    }
+}
