@@ -82,7 +82,13 @@ class ChunksUploader
         $chunks     = $this->getChunkList();
 
         if (!empty($chunks)) {
-            $targetFile = fopen($targetPath, 'ab');
+
+            if(count($chunks) == count($this->getSuccessUploadedChunks())) {
+                $targetFile = fopen($targetPath, 'wb');
+            }
+            else {
+                $targetFile = fopen($targetPath, 'ab');
+            }
 
             foreach ($chunks as $chunkName) {
                 $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
