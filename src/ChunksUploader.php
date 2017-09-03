@@ -79,19 +79,21 @@ class ChunksUploader
         }
 
         $targetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
-        $chunks = $this->getChunkList();
+        $chunks     = $this->getChunkList();
 
-        $targetFile = fopen($targetPath, 'wb');
+        if (!empty($chunks)) {
+            $targetFile = fopen($targetPath, 'ab');
 
-        foreach ($chunks as $chunkName) {
-            $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
+            foreach ($chunks as $chunkName) {
+                $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
 
-            $chunk = fopen($chunkPath, "rb");
-            stream_copy_to_stream($chunk, $targetFile);
-            fclose($chunk);
+                $chunk = fopen($chunkPath, "rb");
+                stream_copy_to_stream($chunk, $targetFile);
+                fclose($chunk);
+            }
+
+            fclose($targetFile);
         }
-
-        fclose($targetFile);
 
         if (!$this->checkMimeType($targetPath)) {
             return [
@@ -117,7 +119,7 @@ class ChunksUploader
             $deleteExtraFilesError  = $e->getMessage() . ' ::: file: ' . $e->getFile() . ' ::: line: ' . $e->getLine();
         }
 
-        return [
+        $response = [
             'status'                 => true,
             'uplodedName'            => $this->getUploadName(),
             'uuid'                   => md5(file_get_contents($targetPath)),
@@ -125,6 +127,12 @@ class ChunksUploader
             'deleteExtraFilesError'  => $deleteExtraFilesError,
             'chunksSubDirectryPath'  => $this->getChunksSubDirectryPath(),
         ];
+
+        if(!$deleteExtraFilesStatus) {
+            $response['uploadedChunks'] = $this->getSuccessUploadedChunks();
+        }
+
+        return $response;
     }
 
     public function setUploadDirectory(string $path)
@@ -179,6 +187,27 @@ class ChunksUploader
     }
 
     private function getChunkList(): array
+    {
+        $path  = $this->getChunksSubDirectryPath();
+        $files = scandir($path, SCANDIR_SORT_ASCENDING);
+
+        $cleanList = [];
+        foreach ($files as $key => $file) {
+            $isHidden = strpos($file, '.');
+
+            if ($isHidden === false || $isHidden > 1) {
+                $cleanList[] = trim($file);
+            }
+        }
+
+        sort($cleanList);
+        return $cleanList;
+    }
+
+    /*
+     * a function to return success uploaded chunks list for debuging.
+     */
+    private function getSuccessUploadedChunks(): array
     {
         $path = $this->getChunkListFilePath();
 
