@@ -3,10 +3,10 @@ namespace MehrdadDadkhah\Video;
 
 class ChunksUploader
 {
-
-    private $allowedExtensions = [];
-    private $sizeLimit         = null;
-    private $chunksFolder      = 'chunks';
+    private $allowedExtensions       = [];
+    private $sizeLimit               = null;
+    private $chunksFolder            = 'chunks';
+    private $generateUploadDirectory = false;
     private $uniqueIdentifier;
     private $fileName;
     private $fileTotalSize;
@@ -68,9 +68,16 @@ class ChunksUploader
 
     public function finishUpload()
     {
-        $chunks = $this->getChunkList();
-
         $targetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
+
+        if (!$this->checkAndGenerateOutputDirectory($targetPath)) {
+            return [
+                'status' => false,
+                'error'  => 'can not generate directory path ' . $targetPath,
+            ];
+        }
+
+        $chunks = $this->getChunkList();
 
         $targetFile = fopen($targetPath, 'wb');
 
@@ -91,10 +98,30 @@ class ChunksUploader
             ];
         }
 
+        $deleteExtraFilesStatus = true;
+        $deleteExtraFilesError  = null;
+        try {
+
+            foreach ($chunks as $chunkName) {
+                $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . $chunkName;
+                unlink($chunkPath);
+            }
+
+            unlink($this->getChunkListFilePath());
+
+            rmdir($this->getChunksSubDirectryPath());
+        } catch (\Exception $e) {
+            $deleteExtraFilesStatus = false;
+            $deleteExtraFilesError  = $e->getMessage() . ' ::: file: ' . $e->getFile() . ' ::: line: ' . $e->getLine();
+        }
+
         return [
-            'status'      => true,
-            'uplodedName' => $this->getUploadName(),
-            'uuid'        => md5(file_get_contents($targetPath)),
+            'status'                 => true,
+            'uplodedName'            => $this->getUploadName(),
+            'uuid'                   => md5(file_get_contents($targetPath)),
+            'deleteExtraFilesStatus' => $deleteExtraFilesStatus,
+            'deleteExtraFilesError'  => $deleteExtraFilesError,
+            'chunksSubDirectryPath'  => $this->getChunksSubDirectryPath(),
         ];
     }
 
@@ -141,7 +168,7 @@ class ChunksUploader
 
     private function makeChunkList(string $chunkName): bool
     {
-        $path = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . 'chunks_list.php';
+        $path = $this->getChunkListFilePath();
 
         $data = [];
         if (file_exists($path)) {
@@ -161,11 +188,16 @@ class ChunksUploader
 
     private function getChunkList(): array
     {
-        $path = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . 'chunks_list.php';
+        $path = $this->getChunkListFilePath();
 
         $data = file_get_contents($path);
 
         return json_decode($data, true);
+    }
+
+    private function getChunkListFilePath(): string
+    {
+        return $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . 'chunks_list.php';
     }
 
     private function getChunksSubDirectryPath(): string
@@ -273,6 +305,33 @@ class ChunksUploader
 
         if (!in_array(mime_content_type($videoPath), $this->mime_types)) {
             return false;
+        }
+
+        return true;
+    }
+
+    public function checkAndGenerateOutputDirectory()
+    {
+        $this->generateUploadDirectory = true;
+
+        return $this;
+    }
+
+    private function checkAndGenerateUploadFolder(string $path)
+    {
+        if ($this->generateUploadDirectory && !is_dir($path)) {
+            $dirWay = explode('/', $path);
+
+            $dir = '';
+            foreach ($dirWay as $step => $directory) {
+                if ($step > 0) {
+                    $dir .= '/' . $directory;
+
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0775);
+                    }
+                }
+            }
         }
 
         return true;

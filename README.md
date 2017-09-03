@@ -40,6 +40,20 @@ $uploadResult = $uploadHandeler->setUploadDirectory('path-to-upload-directory') 
 			->finishUpload();
 ```
 
+## Custome file name
+
+If want to set output file name try use setUploadName() function before fire finishUpload() function:
+```PHP
+$uploadResult = $uploadHandeler->setUploadName('my-name.mp4');
+```
+If don't set name your file name be with structur YYYY_m_d_hashname.mp4 and in final resutl generated name will be return.
+
+## Check and generate output directory
+If want to script make output directory automatically just set it:
+```PHP
+$uploadResult = $uploadHandeler->checkAndGenerateOutputDirectory();
+```
+
 ## License
 
 hls-video-generater is licensed under the [GPLv3 License](http://opensource.org/licenses/GPL).
