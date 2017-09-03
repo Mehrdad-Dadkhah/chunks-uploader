@@ -70,15 +70,15 @@ class ChunksUploader
 
     public function finishUpload()
     {
-        $targetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
 
-        if (!$this->checkAndGenerateOutputDirectory($targetPath)) {
+        if (!$this->checkAndGenerateUploadFolder($this->getUploadDirectory())) {
             return [
                 'status' => false,
                 'error'  => 'can not generate directory path ' . $targetPath,
             ];
         }
 
+        $targetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
         $chunks = $this->getChunkList();
 
         $targetFile = fopen($targetPath, 'wb');
