@@ -36,9 +36,8 @@ $uploadResult = $uploadHandeler->uploadChunk('name-of-chunk-or-chunk-number');
 
 And when all chunks upload:
 ```PHP
-$uploadResult = $uploadHandeler
-					->setUploadDirectory('path-to-upload-directory') //main directry path to upload (combine chunks here)
-                	->finishUpload();
+$uploadResult = $uploadHandeler->setUploadDirectory('path-to-upload-directory') //main directry path to upload (combine chunks here)
+			->finishUpload();
 ```
 
 ## License
