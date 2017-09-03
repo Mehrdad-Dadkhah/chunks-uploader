@@ -45,7 +45,9 @@ class ChunksUploader
             ];
         }
 
-        $upload = move_uploaded_file($_FILES[$this->inputName]['tmp_name'], $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . $chunkName);
+        $uploadChunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . $chunkName;
+        $upload          = move_uploaded_file($_FILES[$this->inputName]['tmp_name'], $uploadChunkPath);
+        chmod($uploadChunkPath, 0775);
 
         if (!$upload) {
             return [
@@ -82,7 +84,7 @@ class ChunksUploader
         $targetFile = fopen($targetPath, 'wb');
 
         foreach ($chunks as $chunkName) {
-            $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . $chunkName;
+            $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
 
             $chunk = fopen($chunkPath, "rb");
             stream_copy_to_stream($chunk, $targetFile);
@@ -170,18 +172,8 @@ class ChunksUploader
     {
         $path = $this->getChunkListFilePath();
 
-        $data = [];
-        if (file_exists($path)) {
-            $data = file_get_contents($path);
-
-            $data = json_decode($data, true);
-        }
-
-        $data[] = $chunkName;
-
-        $data = json_encode($data);
-
-        $result = file_put_contents($path, $data);
+        $txt    = trim($chunkName) . ',';
+        $result = file_put_contents($path, $txt . PHP_EOL, FILE_APPEND | LOCK_EX);
 
         return ($result > 0 ? true : false);
     }
@@ -191,8 +183,11 @@ class ChunksUploader
         $path = $this->getChunkListFilePath();
 
         $data = file_get_contents($path);
+        $data = explode(',', $data);
+        unset($data[count($data) - 1]);
+        sort($data);
 
-        return json_decode($data, true);
+        return $data;
     }
 
     private function getChunkListFilePath(): string
