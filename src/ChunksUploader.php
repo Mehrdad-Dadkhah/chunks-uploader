@@ -25,7 +25,7 @@ class ChunksUploader
 
     public function __construct()
     {
-        @umask(002);
+        @umask(0002);
     }
 
     public function uploadChunk(string $chunkName)
@@ -87,7 +87,11 @@ class ChunksUploader
 
         if (!empty($chunks)) {
 
-            if ($chunks == $this->getSuccessUploadedChunks()) {
+            if (
+                $chunks == $this->getSuccessUploadedChunks()
+                ||
+                !file_exists($targetFile)
+            ) {
                 $targetFile = fopen($targetPath, 'wb');
             } else {
                 @chmod($targetPath, 0775);
@@ -97,7 +101,7 @@ class ChunksUploader
             foreach ($chunks as $chunkName) {
                 $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
 
-                if(file_exists($chunkPath)) {
+                if (file_exists($chunkPath)) {
                     $chunk = fopen($chunkPath, "rb");
                     stream_copy_to_stream($chunk, $targetFile);
                     fclose($chunk);
@@ -105,6 +109,7 @@ class ChunksUploader
             }
 
             fclose($targetFile);
+            @chmod($targetPath, 0775);
         }
 
         if (!$this->checkMimeType($targetPath)) {
@@ -182,7 +187,7 @@ class ChunksUploader
         $path = $this->getChunksSubDirectryPath();
 
         if (!is_dir($path)) {
-            return @mkdir($path);
+            return @mkdir($path, 0775);
         }
 
         return true;
@@ -345,8 +350,6 @@ class ChunksUploader
 
     private function checkMimeType(string $videoPath): bool
     {
-        chmod($videoPath, 0755);
-
         if (!in_array(mime_content_type($videoPath), $this->mime_types)) {
             return false;
         }
@@ -370,7 +373,7 @@ class ChunksUploader
             /*
              * check if mkdir can not generate path try to generate it step by step and find main error
              */
-            if(!is_dir($path)) {
+            if (!is_dir($path)) {
                 $dirWay = explode('/', $path);
 
                 $dir = '';
