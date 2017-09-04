@@ -82,9 +82,12 @@ class ChunksUploader
 
         if (!empty($chunks)) {
 
-            if ($chunks == $this->getSuccessUploadedChunks()) {
+            if($chunks == $this->getSuccessUploadedChunks()) {
                 $targetFile = fopen($targetPath, 'wb');
-            } else {
+            }
+            else {
+                umask(002);
+                @chmod($targetPath, 0775);
                 $targetFile = fopen($targetPath, 'ab');
             }
 
@@ -132,7 +135,7 @@ class ChunksUploader
             'chunksSubDirectryPath'  => $this->getChunksSubDirectryPath(),
         ];
 
-        if (!$deleteExtraFilesStatus) {
+        if(!$deleteExtraFilesStatus) {
             $response['uploadedChunks'] = $this->getSuccessUploadedChunks();
         }
 
