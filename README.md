@@ -3,7 +3,7 @@
 
 [![Software License](https://img.shields.io/badge/license-GPL-brightgreen.svg?style=flat-square)](LICENSE)
 [![Packagist Version](https://img.shields.io/packagist/v/Mehrdad-Dadkhah/chunks-uploader.svg?style=flat-square)](https://packagist.org/packages/mehrdad-dadkhah/chunks-uploader)
-[![Packagist](https://img.shields.io/packagist/dt/Mehrdad-Dadkhah/chunks-uploader.svg?maxAge=2592000)](https://packagist.org/packages/Mehrdad-Dadkhah/chunks-uploader)
+[![Packagist](https://img.shields.io/packagist/dt/Mehrdad-Dadkhah/chunks-uploader.svg?style=flat-square)](https://packagist.org/packages/Mehrdad-Dadkhah/chunks-uploader)
 
 uploader to uplaod chunks of a file and combine them use to upload big files.
 

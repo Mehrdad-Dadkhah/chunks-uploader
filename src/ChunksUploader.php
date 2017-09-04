@@ -23,6 +23,11 @@ class ChunksUploader
         'video/webm', 'video/divx', 'video/mkv', 'video/x-matroska', 'application/octet-stream',
     );
 
+    public function __construct()
+    {
+        @umask(002);
+    }
+
     public function uploadChunk(string $chunkName)
     {
         $checkUploadStatus = $this->checkUploadStatus();
@@ -82,11 +87,9 @@ class ChunksUploader
 
         if (!empty($chunks)) {
 
-            if($chunks == $this->getSuccessUploadedChunks()) {
+            if ($chunks == $this->getSuccessUploadedChunks()) {
                 $targetFile = fopen($targetPath, 'wb');
-            }
-            else {
-                umask(002);
+            } else {
                 @chmod($targetPath, 0775);
                 $targetFile = fopen($targetPath, 'ab');
             }
@@ -94,9 +97,11 @@ class ChunksUploader
             foreach ($chunks as $chunkName) {
                 $chunkPath = $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . trim($chunkName);
 
-                $chunk = fopen($chunkPath, "rb");
-                stream_copy_to_stream($chunk, $targetFile);
-                fclose($chunk);
+                if(file_exists($chunkPath)) {
+                    $chunk = fopen($chunkPath, "rb");
+                    stream_copy_to_stream($chunk, $targetFile);
+                    fclose($chunk);
+                }
             }
 
             fclose($targetFile);
@@ -135,7 +140,7 @@ class ChunksUploader
             'chunksSubDirectryPath'  => $this->getChunksSubDirectryPath(),
         ];
 
-        if(!$deleteExtraFilesStatus) {
+        if (!$deleteExtraFilesStatus) {
             $response['uploadedChunks'] = $this->getSuccessUploadedChunks();
         }
 
@@ -195,7 +200,12 @@ class ChunksUploader
 
     private function getChunkList(): array
     {
-        $path  = $this->getChunksSubDirectryPath();
+        $path = $this->getChunksSubDirectryPath();
+
+        if (!is_dir($path)) {
+            return [];
+        }
+
         $files = scandir($path, SCANDIR_SORT_ASCENDING);
 
         $cleanList = [];
@@ -335,7 +345,6 @@ class ChunksUploader
 
     private function checkMimeType(string $videoPath): bool
     {
-        umask(002);
         chmod($videoPath, 0755);
 
         if (!in_array(mime_content_type($videoPath), $this->mime_types)) {
@@ -355,15 +364,23 @@ class ChunksUploader
     private function checkAndGenerateUploadFolder(string $path)
     {
         if ($this->generateUploadDirectory && !is_dir($path)) {
-            $dirWay = explode('/', $path);
 
-            $dir = '';
-            foreach ($dirWay as $step => $directory) {
-                if ($step > 0) {
-                    $dir .= '/' . $directory;
+            @mkdir($path, 0775, true);
 
-                    if (!is_dir($dir)) {
-                        @mkdir($dir, 0775);
+            /*
+             * check if mkdir can not generate path try to generate it step by step and find main error
+             */
+            if(!is_dir($path)) {
+                $dirWay = explode('/', $path);
+
+                $dir = '';
+                foreach ($dirWay as $step => $directory) {
+                    if ($step > 0) {
+                        $dir .= '/' . $directory;
+
+                        if (!is_dir($dir)) {
+                            mkdir($dir, 0775);
+                        }
                     }
                 }
             }
