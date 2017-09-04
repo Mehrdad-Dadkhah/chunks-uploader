@@ -82,10 +82,9 @@ class ChunksUploader
 
         if (!empty($chunks)) {
 
-            if(count($chunks) == count($this->getSuccessUploadedChunks())) {
+            if ($chunks == $this->getSuccessUploadedChunks()) {
                 $targetFile = fopen($targetPath, 'wb');
-            }
-            else {
+            } else {
                 $targetFile = fopen($targetPath, 'ab');
             }
 
@@ -133,7 +132,7 @@ class ChunksUploader
             'chunksSubDirectryPath'  => $this->getChunksSubDirectryPath(),
         ];
 
-        if(!$deleteExtraFilesStatus) {
+        if (!$deleteExtraFilesStatus) {
             $response['uploadedChunks'] = $this->getSuccessUploadedChunks();
         }
 
@@ -175,7 +174,7 @@ class ChunksUploader
         $path = $this->getChunksSubDirectryPath();
 
         if (!is_dir($path)) {
-            return mkdir($path);
+            return @mkdir($path);
         }
 
         return true;
@@ -361,7 +360,7 @@ class ChunksUploader
                     $dir .= '/' . $directory;
 
                     if (!is_dir($dir)) {
-                        mkdir($dir, 0775);
+                        @mkdir($dir, 0775);
                     }
                 }
             }
