@@ -90,7 +90,7 @@ class ChunksUploader
             if (
                 $chunks == $this->getSuccessUploadedChunks()
                 ||
-                !file_exists($targetFile)
+                !file_exists($targetPath)
             ) {
                 $targetFile = fopen($targetPath, 'wb');
             } else {
@@ -237,6 +237,10 @@ class ChunksUploader
     {
         $path = $this->getChunkListFilePath();
 
+        if(!file_exists($path)) {
+            return [];
+        }
+        
         $data = file_get_contents($path);
         $data = explode(',', $data);
         unset($data[count($data) - 1]);
