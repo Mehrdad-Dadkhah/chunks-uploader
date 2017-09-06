@@ -254,7 +254,7 @@ class ChunksUploader
         return $this->getChunksSubDirectryPath() . DIRECTORY_SEPARATOR . 'chunks_list.php';
     }
 
-    private function getChunksSubDirectryPath(): string
+    public function getChunksSubDirectryPath(): string
     {
         return $this->getChunksFolderPath() . DIRECTORY_SEPARATOR . $this->getUniqiueName();
     }
