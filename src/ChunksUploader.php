@@ -82,7 +82,7 @@ class ChunksUploader
             ];
         }
 
-        $targetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
+        $targetPath = $this->getTempDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
         $chunks     = $this->getChunkList();
 
         if (!empty($chunks)) {
@@ -110,6 +110,17 @@ class ChunksUploader
 
             fclose($targetFile);
             @chmod($targetPath, 0775);
+        }
+        
+        if(file_exists($targetPath) && $this->getUploadDirectory() != $this->getTempDirectory()) {
+            $finalTargetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
+
+            rename($targetPath, $finalTargetPath);
+        } else {
+            return [
+                'status' => false,
+                'error'  => 'can not combine chunk files!',
+            ];
         }
 
         if (!$this->checkMimeType($targetPath)) {
@@ -162,6 +173,22 @@ class ChunksUploader
     public function getUploadDirectory(): string
     {
         return $this->uploadDirectory;
+    }
+
+    public function setTempDirectory(string $path)
+    {
+        $this->tempDirectory = $path;
+
+        return $this;
+    }
+
+    public function getTempDirectory(): string
+    {
+        if($this->tempDirectory == null) {
+            $this->setTempDirectory($this->getUploadDirectory());
+        }
+
+        return $this->tempDirectory;
     }
 
     public function setUploadName(string $name)
