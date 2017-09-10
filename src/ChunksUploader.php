@@ -111,7 +111,13 @@ class ChunksUploader
             fclose($targetFile);
             @chmod($targetPath, 0775);
         }
-        
+        if (!$this->checkMimeType($targetPath)) {
+            return [
+                'status' => false,
+                'error'  => 'not allowed mime type',
+            ];
+        }
+
         if(file_exists($targetPath) && $this->getUploadDirectory() != $this->getTempDirectory()) {
             $finalTargetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
 
@@ -120,13 +126,6 @@ class ChunksUploader
             return [
                 'status' => false,
                 'error'  => 'can not combine chunk files!',
-            ];
-        }
-
-        if (!$this->checkMimeType($targetPath)) {
-            return [
-                'status' => false,
-                'error'  => 'not allowed mime type',
             ];
         }
 
@@ -267,7 +266,7 @@ class ChunksUploader
         if(!file_exists($path)) {
             return [];
         }
-        
+
         $data = file_get_contents($path);
         $data = explode(',', $data);
         unset($data[count($data) - 1]);
