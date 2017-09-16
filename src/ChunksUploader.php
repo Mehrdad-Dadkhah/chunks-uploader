@@ -117,7 +117,12 @@ class ChunksUploader
 
             fclose($targetFile);
             @chmod($targetPath, 0775);
+        } else {
+            if (!file_exists($targetPath)) {
+                $targetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
+            }
         }
+
         if (!$this->checkMimeType($targetPath)) {
             return [
                 'status' => false,
@@ -135,6 +140,7 @@ class ChunksUploader
                 ];
             }
 
+            $targetPath = $finalTargetPath;
         } else {
             return [
                 'status' => false,
