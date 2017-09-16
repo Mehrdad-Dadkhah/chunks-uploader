@@ -78,7 +78,14 @@ class ChunksUploader
         if (!$this->checkAndGenerateUploadFolder($this->getUploadDirectory())) {
             return [
                 'status' => false,
-                'error'  => 'can not generate directory path ' . $targetPath,
+                'error'  => 'can not generate directory path ' . $this->getUploadDirectory(),
+            ];
+        }
+
+        if ($this->getUploadDirectory() != $this->getTempDirectory() && !$this->checkAndGenerateUploadFolder($this->getTempDirectory())) {
+            return [
+                'status' => false,
+                'error'  => 'can not generate directory path ' . $this->getTempDirectory(),
             ];
         }
 
@@ -118,10 +125,16 @@ class ChunksUploader
             ];
         }
 
-        if(file_exists($targetPath) && $this->getUploadDirectory() != $this->getTempDirectory()) {
+        if (file_exists($targetPath) && $this->getUploadDirectory() != $this->getTempDirectory()) {
             $finalTargetPath = $this->getUploadDirectory() . DIRECTORY_SEPARATOR . $this->getUploadName();
 
-            rename($targetPath, $finalTargetPath);
+            if (!rename($targetPath, $finalTargetPath)) {
+                return [
+                    'status' => false,
+                    'error'  => 'can not move final file from ' . $targetPath . ' to ' . $finalTargetPath,
+                ];
+            }
+
         } else {
             return [
                 'status' => false,
@@ -183,7 +196,7 @@ class ChunksUploader
 
     public function getTempDirectory(): string
     {
-        if($this->tempDirectory == null) {
+        if ($this->tempDirectory == null) {
             $this->setTempDirectory($this->getUploadDirectory());
         }
 
@@ -263,7 +276,7 @@ class ChunksUploader
     {
         $path = $this->getChunkListFilePath();
 
-        if(!file_exists($path)) {
+        if (!file_exists($path)) {
             return [];
         }
 
