@@ -5,7 +5,7 @@
 [![Packagist Version](https://img.shields.io/packagist/v/Mehrdad-Dadkhah/chunks-uploader.svg?style=flat-square)](https://packagist.org/packages/mehrdad-dadkhah/chunks-uploader)
 [![Packagist](https://img.shields.io/packagist/dt/Mehrdad-Dadkhah/chunks-uploader.svg?style=flat-square)](https://packagist.org/packages/Mehrdad-Dadkhah/chunks-uploader)
 
-uploader to uplaod chunks of a file and combine them use to upload big files.
+Uploader to uplaod chunks of a file and combine them use to upload big files.
 
 
 
@@ -25,13 +25,13 @@ $uploadHandeler->setMainFileName('myFile.mp4') //main file name
             ->setFileTotalSize($_REQUEST['totalfilesize']) //size of main file (big file)
             ->setInputName('file') //your form input file name
             ->setChunksFolderPath('path-to-chunks-folder') //path to folder for upload chunks files
-            ->setUniqueIdentifier('unique-id'); // set uinique identifier for each upload (for example user id)
+            ->setUniqueIdentifier('unique-id'); // set unique identifier for each upload (for example user id + time or ...) a unique indentifier per each upload
 ```
 
 to upload your chunks:
 
 ```PHP
-$uploadResult = $uploadHandeler->uploadChunk('name-of-chunk-or-chunk-number');
+$uploadResult = $uploadHandeler->uploadChunk('name-of-chunk-or-chunk-number'); //should be a sortable name
 ```
 
 And when all chunks upload:

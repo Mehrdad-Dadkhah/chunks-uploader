@@ -220,7 +220,7 @@ class ChunksUploader
     {
         if (empty($this->uploadName)) {
             $this->setUploadName(
-                date('Y_m_d') . '_' . md5($this->getMainFileName()) . '.mp4'
+                date('Y_m_d') . '_' . md5($this->getUniqiueName()) . '.mp4'
             );
         }
 
