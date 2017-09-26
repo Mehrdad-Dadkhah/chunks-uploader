@@ -11,6 +11,8 @@ class ChunksUploader
     private $fileName;
     private $fileTotalSize;
     private $inputName;
+    private $maxUploadSize;
+    private $videoTotalSize;
 
     protected $uploadName;
 
@@ -26,6 +28,8 @@ class ChunksUploader
     public function __construct()
     {
         @umask(0002);
+
+        // dd($_POST, $_FILES);
     }
 
     public function uploadChunk(string $chunkName)
@@ -34,6 +38,13 @@ class ChunksUploader
 
         if (!$checkUploadStatus['status']) {
             return $checkUploadStatus;
+        }
+
+        if (!$this->checkUploadSize()) {
+            return [
+                'status' => false,
+                'error'  => 'Max upload size. uploaded file size is ' . $this->getVideoTotalSize() . ' bytes but max allowed size is ' . $this->getMaxUploadSize() .' bytes!',
+            ];
         }
 
         if (!$this->makeSubDirectoryForChunks()) {
@@ -364,6 +375,55 @@ class ChunksUploader
         return $_FILES[$this->inputName]['tmp_name'];
     }
 
+    public function setVideoTotalSize(int $size)
+    {
+        $this->videoTotalSize = $size;
+
+        return $this;
+    }
+
+    private function getVideoTotalSize(): int
+    {
+        if ($this->videoTotalSize < 1) {
+            $uploadedChunksCount = count($this->getSuccessUploadedChunks());
+
+            $onePartSize = $_FILES[$this->inputName]['size'];
+
+            $minTotalSize = ($uploadedChunksCount + 1) * $onePartSize;
+
+            $this->setVideoTotalSize($minTotalSize);
+        }
+
+        return $this->videoTotalSize;
+    }
+
+    public function setMaxUploadSize(int $size)
+    {
+        $this->maxUploadSize = $size;
+
+        return $this;
+    }
+
+    public function getMaxUploadSize(): int
+    {
+        if ($this->maxUploadSize < 1) {
+            $maxUpload = $this->convertToBytes(ini_get('upload_max_filesize')); //select maximum upload size
+
+            $this->setMaxUploadSize($maxUpload); // set the smallest of them, this defines the real limit
+        }
+
+        return $this->maxUploadSize;
+    }
+
+    private function checkUploadSize(): bool
+    {
+        if ($this->getVideoTotalSize() > $this->getMaxUploadSize()) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function checkUploadStatus(): array
     {
         // Check $_FILES['upfile']['error'] value.
@@ -439,5 +499,28 @@ class ChunksUploader
         }
 
         return true;
+    }
+
+    private function convertToBytes($stringSize): int
+    {
+        if ($stringSize == -1) {
+            return 9223372036854775807;
+        }
+
+        $stringSize = trim($stringSize);
+        $last       = strtolower($stringSize[strlen($stringSize) - 1]);
+
+        $size = substr($stringSize, 0, strlen($stringSize) - 1);
+
+        switch ($last) {
+            case 'g':
+                $size *= 1024;
+            case 'm':
+                $size *= 1024;
+            case 'k':
+                $size *= 1024;
+        }
+
+        return $size;
     }
 }
