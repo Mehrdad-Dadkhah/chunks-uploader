@@ -243,7 +243,7 @@ class ChunksUploader
         $path = $this->getChunksSubDirectryPath();
 
         if (!is_dir($path)) {
-            return @mkdir($path, 0775);
+            return $this->checkAndGenerateUploadFolder($path);
         }
 
         return true;
