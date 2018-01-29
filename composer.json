@@ -7,7 +7,7 @@
     "require": {
 	    "php": ">=5.5"
     },
-    "license": "GPLv3",
+    "license": "GPL-3.0-only",
     "authors": [
         {
             "name": "Mehrdad Dadkhah",
