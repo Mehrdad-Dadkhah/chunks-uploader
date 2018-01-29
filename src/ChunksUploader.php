@@ -460,6 +460,7 @@ class ChunksUploader
         'audio/mp4'                                                                 => '.mp4a',
         'video/mp4'                                                                 => '.mp4',
         'application/mp4'                                                           => '.mp4',
+        'video/x-matroska'                                                          => '.mkv',
         'application/vnd.apple.mpegurl'                                             => '.m3u8',
         'application/vnd.musician'                                                  => '.mus',
         'application/vnd.muvee.style'                                               => '.msty',
